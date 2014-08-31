@@ -23,8 +23,8 @@ player2.onload = function(){
 };
 
 var hero2 ={
-    x: (canvas.width / 2)+20,
-    y: (canvas.height / 2) - 50,
+    x: (canvas.width / 2)+0,
+    y: (canvas.height / 2) - 0,
     speed: 256
 };
 
@@ -84,14 +84,21 @@ function update(modifier) {
 };
 
 function updateMouse(){
-
+    if(mouse.x>=hero2.x&&mouse.x<=hero2.x+57){
+        if(mouse.y>=hero2.y&&mouse.y<=hero2.y+99){
+            if(isMouseDown){
+                hero2.x = mouse.x-26.5;
+                hero2.y = mouse.y-50;
+            }
+        }
+    }
 };
 
 function render() {
     ctx.drawImage(background, 0, 0);
     ctx.drawImage(player, hero.x, hero.y);
     ctx.drawImage(player2, hero2.x, hero2.y);
-    ctx.fillText(hero.x + " " + hero.y, 10, 30);
+    ctx.fillText(hero2.x + " " + hero2.y, 10, 30);
     ctx.fillText(mouse.x + " " + mouse.y, 10, 50);
     ctx.fillText(isMouseDown,10,70);
 };
@@ -100,6 +107,7 @@ function render() {
 
 
 function runTheGame() {
+    updateMouse((Date.now() - time) / 1000);
     update((Date.now() - time) / 1000);
     render();
     time = Date.now();
