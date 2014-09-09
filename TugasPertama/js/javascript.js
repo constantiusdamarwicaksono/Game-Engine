@@ -55,7 +55,9 @@ var oldY2;
 var hero2 = {
     x: (canvas.width / 2) + 0,
     y: (canvas.height / 2) - 0,
-    speed: 256
+    speed: 256,
+    width: 57,
+    height: 100
 };
 var oldX;
 var oldY;
@@ -92,9 +94,9 @@ canvas.addEventListener("mouseup", function () {
 }, false);
 
 canvas.addEventListener("mousemove", function (event) {
-
-    mouse.x = event.pageX;
-    mouse.y = event.pageY;
+    var rec = canvas.getBoundingClientRect();
+    mouse.x = event.pageX - rec.left;
+    mouse.y = event.pageY - rec.top;
 
 });
 
@@ -115,7 +117,7 @@ function update(modifier) {
     if (40 in keysDown) {
         hero.y += hero.speed * modifier;
     }
-    collisionCheckHero1();
+    collisionCheckHero();
 };
 
 function updateMouse() {
@@ -124,7 +126,7 @@ function updateMouse() {
         oldY2 = hero2.y;
         hero2.x = mouse.x - 26.5;
         hero2.y = mouse.y - 50;
-        collisionCheckHero2();
+        collisionCheckHero();
 
     }
 };
@@ -150,15 +152,13 @@ function runTheGame() {
 };
 
 
-function collisionCheckHero1() {
-    if (((hero.x + hero.width >= obstacle.x) && (hero.x <= obstacle.x + obstacle.width)) && ((hero.y + hero.height >= obstacle.y) && (hero.y <= obstacle.y + obstacle.height))) {
+function collisionCheckHero() {
+    if ((((hero.x + hero.width >= obstacle.x) && (hero.x <= obstacle.x + obstacle.width)) && ((hero.y + hero.height >= obstacle.y) && (hero.y <= obstacle.y + obstacle.height))) || (hero.x <= 0) || (hero.y <= 0) || (hero.x + hero.width >= 700) || (hero.y + hero.height >= 500)) {
         hero.x = oldX;
         hero.y = oldY;
     }
-};
 
-function collisionCheckHero2() {
-    if (((hero2.x + hero2.width >= obstacle.x) && (hero2.x <= obstacle.x + obstacle.width)) && ((hero2.y + hero2.height >= obstacle.y) && (hero2.y <= obstacle.y + obstacle.height))) {
+    if ((((hero2.x + hero2.width >= obstacle.x) && (hero2.x <= obstacle.x + obstacle.width)) && ((hero2.y + hero2.height >= obstacle.y) && (hero2.y <= obstacle.y + obstacle.height))) || (hero2.x <= 0) || (hero2.y <= 0) || (hero2.x + hero2.width >= 700) || (hero2.y + hero2.height >= 500)) {
         hero2.x = oldX2;
         hero2.y = oldY2;
     }

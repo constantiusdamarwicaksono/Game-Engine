@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Game Engine Pertemuan 3</title>
+</head>
+<style>
+    #myCanvas {
+        border: 2px dashed #FF0000;
+    }
+</style>
+
+<body>
+    <canvas id="myCanvas" width="700" height="500"></canvas>
+    <script>
+        var canvas = document.getElementById('myCanvas');
+        var ctx = canvas.getContext('2d');
+         //letakkan script inisialisasi dan penggambaran STATIS di sini
+         //buatlah struktur data objek Anda menjadi seperti ini:
+        var jmlmusuh = 5;
+        var teman = {
+            x: 200,
+            y: 200,
+            warna: "#FF0000" //diganti dengan src untuk gambar
+        };
+        var musuh = new Array();
+        for (var i = 0; i < jmlmusuh; i++) {
+            xawal = Math.floor(Math.random() * 700);
+            yawal = Math.floor(Math.random() * 500);
+            musuh[i] = {
+                x: xawal,
+                y: yawal,
+                warna: "#" + ((1 << 24) * Math.random() | 0).toString(16),
+                tujx: xawal,
+                tujy: yawal
+            };
+        }
+         //fungsi deteksi mouse drag and drop
+        window.addEventListener("mousedown", mousedn, true);
+        window.addEventListener("mousemove", mousemv, true);
+        window.addEventListener("mouseup", mouseup, true);
+        var ditekan = false;
+
+        function mousedn(e) {
+            var rect = canvas.getBoundingClientRect();
+            msx = e.pageX - rect.left;
+            msy = e.pageY - rect.top;
+            if (msx > teman.x - 32 && msx < teman.x + 32) {
+                if (msy > teman.y - 32 && msy < teman.y + 32) {
+                    ditekan = true;
+                }
+            }
+        }
+
+        function mousemv(e) {
+            if (ditekan) {
+                var rect = canvas.getBoundingClientRect();
+                teman.x = e.pageX - rect.left;
+                teman.y = e.pageY - rect.top;
+            }
+        }
+
+        function mouseup(e) {
+            ditekan = false;
+        }
+         //letakkan script penggambaran dan kalkulasi DINAMIS di sini
+        function gambarkan() {
+            //inisialisasi kanvas dan variabel awal
+            ctx.clearRect(0, 0, 700, 500);
+            var jarijari = 32;
+            //steering
+            //flee untuk musuh[0];
+            var jarakx = Math.floor(Math.abs(teman.x - musuh[0].x)); //ukur jarak x
+            var jaraky = Math.floor(Math.abs(teman.y - musuh[0].y)); //ukur jarak y
+            if (jarakx <= 64 && jaraky <= 64) {
+                if (musuh[0].x > teman.x) {
+                    musuh[0].tujx = musuh[0].x + 50;
+                }
+                if (musuh[0].x < teman.x) {
+                    musuh[0].tujx = musuh[0].x - 50;
+                }
+                if (musuh[0].y > teman.y) {
+                    musuh[0].tujy = musuh[0].y + 50;
+                }
+                if (musuh[0].y < teman.y) {
+                    musuh[0].tujy = musuh[0].y - 50;
+                }
+            }
+            //flee untuk musuh[1];
+            if (musuh[1].x > teman.x) {
+                musuh[1].tujx = musuh[1].x + 50;
+            }
+            if (musuh[1].x < teman.x) {
+                musuh[1].tujx = musuh[1].x - 50;
+            }
+            if (musuh[1].y > teman.y) {
+                musuh[1].tujy = musuh[1].y + 50;
+            }
+            if (musuh[1].y < teman.y) {
+                musuh[1].tujy = musuh[1].y - 50;
+            }
+            //seek untuk musuh[2];
+            var jarakx = Math.floor(Math.abs(teman.x - musuh[2].x)); //ukur jarak x
+            var jaraky = Math.floor(Math.abs(teman.y - musuh[2].y)); //ukur jarak y
+            if (jarakx > 64 || jaraky > 64) {
+                musuh[2].tujx = teman.x;
+                musuh[2].tujy = teman.y;
+            } else {
+                musuh[2].tujx = musuh[2].x;
+                musuh[2].tujy = musuh[2].y;
+            }
+            //seek untuk musuh[3];
+            musuh[3].tujx = teman.x;
+            musuh[3].tujy = teman.y;
+            //wander untuk musuh[4];
+            if (musuh[4].x == musuh[4].tujx && musuh[4].y == musuh[4].tujy) {
+                musuh[4].tujx = jarijari + Math.floor(Math.random() * (canvas.width - 32));
+                musuh[4].tujy = jarijari + Math.floor(Math.random() * (canvas.height - 32));
+            }
+            //locomotive
+            var geseran = 1;
+            for (var i = 0; i < jmlmusuh; i++) {
+                if (musuh[i].x > musuh[i].tujx) {
+                    musuh[i].x = musuh[i].x - geseran;
+                }
+                if (musuh[i].x < musuh[i].tujx) {
+                    musuh[i].x = musuh[i].x + geseran;
+                }
+                if (musuh[i].y > musuh[i].tujy) {
+                    musuh[i].y = musuh[i].y - geseran;
+                }
+                if (musuh[i].y < musuh[i].tujy) {
+                    musuh[i].y = musuh[i].y + geseran;
+                }
+            }
+            //gambarkan teman
+            ctx.beginPath();
+            ctx.arc(teman.x, teman.y, jarijari, 0, 2 * Math.PI, false);
+            ctx.closePath();
+            ctx.fillStyle = teman.warna;
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(teman.x, teman.y, jarijari / 4, 0, 2 * Math.PI, false);
+            ctx.closePath();
+            ctx.fillStyle = "#000000";
+            ctx.fill();
+            /////teks keterangan
+            ctx.font = '10pt Calibri';
+            ctx.fillStyle = "#000000";
+            ctx.fillText("x:" + teman.x, teman.x - 32, teman.y + 42);
+            ctx.fillText("y:" + teman.y, teman.x + 5, teman.y + 42);
+            //gambarkan musuh
+            for (var i = 0; i < jmlmusuh; i++) {
+                if (musuh[i].x < jarijari) {
+                    musuh[i].x = jarijari;
+                }
+                if (musuh[i].y < jarijari) {
+                    musuh[i].y = jarijari;
+                }
+                if (musuh[i].x > canvas.width - jarijari) {
+                    musuh[i].x = canvas.width - jarijari;
+                }
+                if (musuh[i].y > canvas.height - jarijari) {
+                    musuh[i].y = canvas.height - jarijari;
+                }
+                ctx.beginPath();
+                ctx.arc(musuh[i].x, musuh[i].y, jarijari, 0, 2 * Math.PI, false);
+                ctx.closePath();
+                ctx.fillStyle = musuh[i].warna;
+                ctx.fill();
+                ctx.stroke();
+                //teks indikator
+                ctx.font = '20pt Calibri';
+                ctx.fillStyle = "#FFFFFF";
+                ctx.fillText(i, musuh[i].x, musuh[i].y);
+                ctx.font = '10pt Calibri';
+                ctx.fillStyle = "#000000";
+                ctx.fillText("x:" + musuh[i].x, musuh[i].x - 32, musuh[i].y + 42);
+                ctx.fillText("y:" + musuh[i].y, musuh[i].x + 5, musuh[i].y + 42);
+                ctx.fillText("Tx:" + musuh[i].tujx, musuh[i].x - 32, musuh[i].y - 36);
+                ctx.fillText("Ty:" + musuh[i].tujy, musuh[i].x + 5, musuh[i].y - 36);
+            }
+            //munculkan teks keterangan
+            ctx.fillStyle = "#000000";
+            ctx.fillText("Musuh 0 flee jika jarak dengan teman <= 64", 30, 465);
+            ctx.fillText("Musuh 1 flee tanpa syarat", 30, 480);
+            ctx.fillText("Musuh 2 seek jika jarak dengan teman >= 64", 30, 495);
+            ctx.fillText("Musuh 3 seek tanpa syarat", 380, 465);
+            ctx.fillText("Musuh 4 wander", 380, 480);
+        }
+        setInterval(gambarkan, 100);
+    </script>
+</body>
+
+</html>
