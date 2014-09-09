@@ -44,6 +44,12 @@ player2.onload = function () {
     ctx.drawImage(tembok, obstacle.x, obstacle.y);
 };
 
+var ghost = new Image();
+ghost.src = "images/ghost.png";
+ghost.onload = function () {
+    ctx.drawImage(ghost, wanderGhost.x, wanderGhost.y)
+};
+
 var obstacle = {
     x: 0,
     y: 0,
@@ -67,6 +73,18 @@ var hero = {
     speed: 256,
     width: 57,
     height: 100
+};
+
+var xawal = Math.floor(Math.random() * 700);
+var yawal = Math.floor(Math.random() * 500);
+var wanderGhost = {
+    x: 100,
+    y: 100,
+    xTujuan: xawal,
+    yTujuan: yawal,
+    speed: 1,
+    width: 40,
+    height: 40
 };
 
 var mouse = {
@@ -131,13 +149,37 @@ function updateMouse() {
     }
 };
 
+function ghostWalk() {
+    if (wanderGhost.x == wanderGhost.xTujuan && wanderGhost.y == wanderGhost.yTujuan) {
+        wanderGhost.xTujuan = 20 + Math.floor(Math.random() * (canvas.width - 20));
+        wanderGhost.yTujuan = 20 + Math.floor(Math.random() * (canvas.height - 20));
+    }
+    if (wanderGhost.x > wanderGhost.xTujuan) {
+        wanderGhost.x = wanderGhost.x - wanderGhost.speed;
+    }
+    if (wanderGhost.x < wanderGhost.xTujuan) {
+        wanderGhost.x = wanderGhost.x + wanderGhost.speed;
+    }
+    if (wanderGhost.y > wanderGhost.yTujuan) {
+        wanderGhost.y = wanderGhost.y - wanderGhost.speed;
+    }
+    if (wanderGhost.y < wanderGhost.yTujuan) {
+        wanderGhost.y = wanderGhost.y + wanderGhost.speed;
+    }
+    if (((wanderGhost.x + wanderGhost.width >= obstacle.x) && (wanderGhost.x <= obstacle.x + obstacle.width)) && ((wanderGhost.y + wanderGhost.height >= obstacle.y) && (wanderGhost.y <= obstacle.y + obstacle.height))) {
+        wanderGhost.xTujuan = 20 + Math.floor(Math.random() * (canvas.width - 20));
+        wanderGhost.yTujuan = 20 + Math.floor(Math.random() * (canvas.height - 20));
+    }
+};
+
 function render() {
     ctx.drawImage(background, 0, 0);
-    ctx.drawImage(tembok, obstacle.x, obstacle.y);
+    ctx.drawImage(ghost, wanderGhost.x, wanderGhost.y)
     ctx.drawImage(player, hero.x, hero.y);
     ctx.drawImage(player2, hero2.x, hero2.y);
     ctx.drawImage(rumput2, 547, 0);
-    ctx.drawImage(rumput, 121, 347);
+    ctx.drawImage(rumput, 121, 347)
+    ctx.drawImage(tembok, obstacle.x, obstacle.y);;
     ctx.fillText(obstacle.x + " " + obstacle.y, 10, 30);
     ctx.fillText(mouse.x + " " + mouse.y, 10, 50);
     ctx.fillText(isMouseDown, 10, 70);
@@ -147,6 +189,7 @@ function render() {
 function runTheGame() {
     updateMouse((Date.now() - time) / 1000);
     update((Date.now() - time) / 1000);
+    ghostWalk();
     render();
     time = Date.now();
 };
@@ -166,4 +209,4 @@ function collisionCheckHero() {
 
 runTheGame();
 var time = Date.now();
-setInterval(runTheGame, 1);
+setInterval(runTheGame, 10);
