@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Cafetaria Cleaner</title>
+	<style type="text/css">
+	 #myCanvas {
+        margin-top: 20px;
+    }
+    body{
+    	background-color: white;
+    	text-align: center;
+    }
+    </style>
+    <link rel="icon" href="logo.png" type="image/x-icon" />
+</head>
+<body>
+	<canvas id="myCanvas" width="900" height="600"></canvas>
+</body>
+<script type="text/javascript">
+	var skor = sessionStorage.getItem("lastScore");
+	if(skor=="null"){
+		skor=0;
+	}
+	var status = sessionStorage.getItem("status");
+	var canvas = document.getElementById("myCanvas");
+	var context = canvas.getContext("2d");
+	msx=0;
+	msy=0;
+	var gameStatus ={
+		bgLoaded : false,
+		heroLoaded:false,
+		enemyLoaded:false,
+		yaLoaded:false,
+		menangLoaded:false,
+		kalahLoaded:false,
+		lalatLoaded:false,
+		tryAgainLoaded:false
+	}
+	console.log(status);
+		var gameProperty ={
+			hoverStyle :"#FF550F",
+			
+		}
+
+		var bg = new Image();
+		bg.src = "bgEndHtml.png";
+		bg.onload = function(){
+			gameStatus.bgLoaded=true;
+		};
+
+		var ya = new Image();
+		ya.src = "gambar_ya.png";
+		ya.onload=function(){
+			gameStatus.yaLoaded=true;
+		};
+	if(status=="lose"){
+	 	var enemy = new Image();
+		enemy.src="gambar_kemprohman.png";
+		enemy.onload= function(){
+			gameStatus.enemyLoaded=true;
+		};
+		
+		var kalah = new Image();
+		kalah.src = "you_failed.png";
+		kalah.onload=function(){
+			gameStatus.kalahLoaded=true;
+		};
+			
+		var lalat = new Image();
+		lalat.src = "gambar_laler.png";
+		lalat.onload=function(){
+			gameStatus.lalatLoaded=true;
+		};
+
+		var tryAgain = new Image();
+		tryAgain.src = "try_again.png";
+		tryAgain.onload= function(){
+			gameStatus.tryAgainLoaded=true;
+		};
+	}else if(status=="win"){	
+	 	var menang = new Image();
+		menang.src="you_win.png";
+		menang.onload=function(){
+			gameStatus.menangLoaded=true;
+		};
+			
+		var hero = new Image();
+		hero.src="gambar_hero.png";
+		hero.onload=function(){
+			gameStatus.heroLoaded=true
+		};
+	}
+		
+	
+
+	window.addEventListener("mousemove",function(e){
+		var rect = canvas.getBoundingClientRect();
+        msx = e.pageX - rect.left;
+        msy = e.pageY - rect.top;
+        if(status=="lose"){
+        	if(msx>65&&msx<65+200&&msy>455&&msy<455+75){
+	        	gameProperty.hoverStyle="#FF7700";
+	        	canvas.style.cursor="pointer";
+	        }else{
+	        	gameProperty.hoverStyle="#FF550F";
+	        	canvas.style.cursor="default";
+	        }
+        }
+	    if(status=="win"){
+	    	if(msx>600&&msx<600+200&&msy>460&&msy<460+75){
+	        	gameProperty.hoverStyle="#FF7700";
+	        	canvas.style.cursor="pointer";
+	        }else{
+	        	gameProperty.hoverStyle="#FF550F";
+	        	canvas.style.cursor="default";
+	        }
+	    }
+	});
+
+	window.addEventListener("mousedown",function(e){
+		var rect = canvas.getBoundingClientRect();
+        msx = e.pageX - rect.left;
+        msy = e.pageY - rect.top;
+		if(status=="lose"){
+        	if(msx>65&&msx<65+200&&msy>455&&msy<455+75){
+	        	window.location.href="main.html";
+	        	 sessionStorage.setItem("lastScore",0);
+	        }
+        }
+	    if(status=="win"){
+	    	if(msx>600&&msx<600+200&&msy>460&&msy<460+75){
+	        	window.location.href="index.html";
+	        	 sessionStorage.setItem("lastScore",0);
+	        }
+	    }
+	});
+	
+	function roundRect(ctx, x, y, width, height, radius, fill, stroke,fillStyle) {
+		  ctx.beginPath();
+		  ctx.moveTo(x + radius, y);
+		  ctx.lineTo(x + width - radius, y);
+		  ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+		  ctx.lineTo(x + width, y + height - radius);
+		  ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+		  ctx.lineTo(x + radius, y + height);
+		  ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+		  ctx.lineTo(x, y + radius);
+		  ctx.quadraticCurveTo(x, y, x + radius, y);
+		  ctx.closePath();
+		 
+		  
+		  
+		  if (fill) {
+		  	context.fillStyle=gameProperty.hoverStyle;
+		    ctx.fill();
+		  }
+  		}
+
+	function drawAll(){
+		context.clearRect(0,0,900,600);
+		if(gameStatus.bgLoaded&&gameStatus.yaLoaded){
+			context.drawImage(bg,0,0,450,300,0,0,900,600);
+			if(status=="lose"&&gameStatus.enemyLoaded&&gameStatus.kalahLoaded&&gameStatus.lalatLoaded){
+				context.drawImage(enemy,370,200);
+				context.drawImage(lalat,290,170);
+				context.drawImage(kalah,180,15);
+				context.drawImage(tryAgain,67,400);
+				roundRect(context,65,455,200,75,10,true,true,gameProperty.hoverStyle);
+				context.font="60px Arial";
+				context.fillStyle="#FF110F";
+				context.drawImage(ya,120,465);
+				context.fillStyle="#000000";
+				context.font="40px Arial";
+				context.fillText("Score : "+skor,56,270);
+			}else if(status=="win"&&gameStatus.heroLoaded&&gameStatus.menangLoaded){
+				context.drawImage(hero,10,210);
+				context.drawImage(menang,120,35);
+				roundRect(context,600,460,200,75,10,true,true,gameProperty.hoverStyle);
+				context.fillStyle="#000000";
+				context.font="40px Arial";
+				context.fillText("Score : "+skor,381,270);
+				context.font="28px Arial";
+				context.fillText("Back to Menu",611,509);
+			}
+			/*
+			context.fillText("YA",120,515);*/
+		}
+		/*context.font="10px Arial";
+		context.fillText(msx+" "+msy,10,10);*/
+	}
+	setInterval(drawAll,10);
+</script>
+</html>

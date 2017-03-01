@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Cafetaria Cleaner</title>
+	<link rel="icon" href="logo.png" type="image/x-icon" />
+	    <style type="text/css">
+     #myCanvas {
+        margin-top: 20px;
+    }
+    body{
+        background-color: white;
+        text-align: center;
+    }
+    </style>
+</head>
+<body>
+	<canvas id="myCanvas" width="900" height="600"></canvas>
+	<script type="text/javascript">
+		gameStatus = {
+			bgLoaded : false,
+			titleLoaded : false,
+			kataLoaded:false,
+			
+		};
+		fillStyle = "#FF7700";
+		fillStyle2 = "#FF7700";	
+		var canvas = document.getElementById("myCanvas");
+		var context = canvas.getContext("2d");	
+
+		var bgImage = new Image();
+		bgImage.src = "bgMainMenu.png";
+		bgImage.onload = function(){
+			gameStatus.bgLoaded = true;
+		};
+		var title = new Image();
+		title.src = "bgTitleAbout.png";
+		title.onload = function(){
+			gameStatus.titleLoaded = true;
+		};
+		var kata = new Image();
+		kata.src="aboutKata.png";
+		kata.onload = function(){
+			gameStatus.kataLoaded=true;
+		};
+
+		window.addEventListener("mousemove",function(e){
+			var rect = canvas.getBoundingClientRect();
+	        msx = e.pageX - rect.left;
+	        msy = e.pageY - rect.top;
+	       
+		    	if(msx>30&&msx<180&&msy>30&&msy<90){
+		    		fillStyle2="#FFFFFF";
+		        	fillStyle="#FF7700";
+		        	canvas.style.cursor="pointer";
+		        }else{
+		        	fillStyle="#FF550F";
+		        	fillStyle2="#FF7700";
+		        	canvas.style.cursor="default";
+		        }
+	   	 
+		});
+		window.addEventListener("mousedown",function(e){
+			var rect = canvas.getBoundingClientRect();
+	        msx = e.pageX - rect.left;
+	        msy = e.pageY - rect.top;
+
+		        if(msx>30&&msx<180&&msy>30&&msy<90){
+		        	window.location.href="index.html";
+		        }
+
+		});
+
+		function drawAll(){
+			if(gameStatus.bgLoaded&&gameStatus.titleLoaded&&gameStatus.kataLoaded){
+				context.clearRect(0,0,900,600);
+				context.drawImage(bgImage,0,0);
+				context.drawImage(title,270,-10);
+				context.drawImage(kata,150,130);
+				context.strokeStyle=fillStyle;
+				context.strokeRect(30,30,140,45);
+				context.fillStyle=fillStyle2;
+				context.fillRect(30,30,140,45);
+				context.fillStyle="#000000";
+				context.font="20px Arial";
+				context.fillText("back to menu",40,60);
+			}
+		}
+
+		setInterval(drawAll,10);
+	</script>
+</body>
+</html>

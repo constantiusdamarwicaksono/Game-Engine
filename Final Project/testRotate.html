@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Test rotate</title>
+	<style type="text/css">
+	#myCanvas{
+		border: 1px solid grey;
+	}
+	</style>
+</head>
+<body>
+<canvas id="myCanvas" width="900" height="600"></canvas>
+<script type="text/javascript">
+	var context = (document.getElementById("myCanvas")).getContext("2d");
+	context.fillStyle="#FF0000";
+	loadLoaded = false;
+	/*load2Loaded = false;
+	load3Loaded = false;
+	load4Loaded = false;*/
+	var loadScreen = new Image();
+	loadScreen.src="loadScreenFull.png";
+	/*var loadScreen2 = new Image();
+	loadScreen2.src="loadScreen2.png";
+	var loadScreen3 = new Image();
+	loadScreen3.src="loadScreenTengah.png";
+	var loadScreen4 = new Image();
+	loadScreen4.src="loadScreenNotif.png";
+	
+	loadScreen2.onload=function(){
+		load2Loaded=true;
+	};
+	loadScreen3.onload=function(){
+		load3Loaded=true
+	};
+	loadScreen4.onload=function(){
+		load4Loaded=true;
+	};*/
+	loadScreen.onload=function(){
+		loadLoaded=true;
+	};
+		
+	
+	
+	toRadians= Math.PI/180;
+	putaran =1;
+	function draw(){
+		if(loadLoaded/*&&load2Loaded&&load3Loaded&&load4Loaded*/){
+			if(putaran<360){
+				putaran+=7;
+			}else{
+				putaran=1;
+			}
+			context.clearRect(0,0,900,600);
+			context.save();
+			context.translate(450,250);
+			context.rotate(2*putaran*toRadians);
+			context.drawImage(loadScreen,0,0,132,132,-66,-66,132,132);
+			context.restore();
+			context.save();
+			context.translate(450,250);
+			context.rotate(-1*putaran*toRadians);
+			context.drawImage(loadScreen,132,0,72,72,-36,-36,72,72);
+			context.restore();
+			context.drawImage(loadScreen,203,0,27,28,450-13,250-14,27,27);
+			context.drawImage(loadScreen,230,0,260,70,450-132,330,253,63);
+		}
+	}
+	var game = setInterval(draw,10);	
+</script>
+</body>
+</html>

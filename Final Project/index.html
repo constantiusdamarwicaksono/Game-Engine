@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Cafetaria Cleaner</title>
+	<link rel="icon" href="logo.png" type="image/x-icon" />
+	<style type="text/css">
+	 #myCanvas {
+        margin-top: 20px;
+    }
+    body{
+    	background-color: white;
+    	text-align: center;
+    }
+    </style>
+</head>
+<body>
+	<canvas id="myCanvas" width="900" height="600"></canvas>
+	<script type="text/javascript">
+		var canvas = document.getElementById("myCanvas");
+		var context = canvas.getContext("2d");
+
+		gameStatus = {
+			bgLoaded : false,
+			titleLoaded : false,
+			bgWongLoaded : false,
+			startOptionLoaded : false,
+			helpOptionLoaded : false,
+			AboutOptionLoaded : false,
+			degree :10,
+			helpZoom : 1,
+			aboutZoom : 1
+		};
+		
+		var keRadian = Math.PI/180;
+
+		var startButton = {
+			startZoom :1,
+			startX:600,
+			startY:300,
+			width:204,
+			height:85
+		};
+
+		var helpButton = {
+			helpZoom :1,
+			helpX:606,
+			helpY:400,
+			width:185,
+			height:81
+		};
+
+		var bgImage = new Image();
+		bgImage.src = "bgMainMenu.png";
+		bgImage.onload = function(){
+			gameStatus.bgLoaded = true;
+		};
+
+		var title = new Image();
+		title.src = "bgTitle.png";
+		title.onload = function(){
+			gameStatus.titleLoaded = true;
+		};
+		
+		var bgWong = new Image();
+		bgWong.src = "bgWong.png";
+		bgWong.onload = function(){
+			gameStatus.bgWongLoaded = true;
+		};
+
+		var optStart = new Image();
+		optStart.src = "optMainStart.png";
+		optStart.onload = function(){
+			gameStatus.startOptionLoaded=true;
+		};
+
+		var optHelp = new Image();
+		optHelp.src = "optMainHelp.png";
+		optHelp.onload = function(){
+			gameStatus.helpOptionLoaded=true;
+		};
+
+
+		function drawBg(){
+			if(gameStatus.bgLoaded==true&&gameStatus.titleLoaded==true&&gameStatus.bgWongLoaded==true){
+				context.drawImage(bgImage,0,0);
+				context.drawImage(bgWong,0,0);
+				context.drawImage(title,247,0);
+				context.drawImage(optStart,0,0,startButton.width,startButton.height,startButton.startX,startButton.startY,startButton.startZoom*startButton.width,startButton.startZoom*startButton.height);
+				context.drawImage(optHelp,0,0,helpButton.width,helpButton.height,helpButton.helpX,helpButton.helpY,helpButton.helpZoom*helpButton.width,helpButton.helpZoom*helpButton.height);
+				//context.drawImage(optHelp,helpButton.helpX,helpButton.helpY);
+			}
+		};
+
+
+		window.addEventListener('mousemove',function(e){
+			var rect = canvas.getBoundingClientRect();
+            var msx = e.pageX - rect.left;
+            var msy = e.pageY - rect.top;
+
+            if(msx>=startButton.startX&&msx<=startButton.startX+startButton.width&&msy>=startButton.startY&&msy<=startButton.startY+startButton.height){
+            	startButton.startZoom=1.2;
+            	helpButton.helpZoom=1;
+            	startButton.startX=(600-(0.1*startButton.width));
+            	startButton.startY=(300-(0.1*startButton.height));
+            	canvas.style.cursor="pointer";
+            }else{
+            	startButton.startZoom=1;
+            	startButton.startX=600;
+            	startButton.startY=300;
+            	canvas.style.cursor="default";
+            
+            }
+
+             if(msx>=helpButton.helpX&&msx<=helpButton.helpX+helpButton.width&&msy>=helpButton.helpY&&msy<=helpButton.helpY+helpButton.height){
+            	startButton.startZoom=1;
+            	helpButton.helpZoom=1.2;
+            	helpButton.helpX=(606-(0.1*helpButton.width));
+            	helpButton.helpY=(400-(0.1*helpButton.height));
+            	canvas.style.cursor="pointer";
+            }else{
+            	helpButton.helpZoom=1;
+            	helpButton.helpX=606;
+            	helpButton.startY=400;
+            }
+
+
+		});
+		window.addEventListener('mousedown',function(e){
+			var rect = canvas.getBoundingClientRect();
+            var msx = e.pageX - rect.left;
+            var msy = e.pageY - rect.top;
+
+            if(msx>=630&&msx<=630+170&&msy>=300&&msy<=300+56){
+            	window.location.href ="main.html";
+            }
+            if(msx>=606&&msx<=606+185&&msy>=400&&msy<=400+81){
+            	window.location.href ="about.html";
+            }
+		});
+		setInterval(drawBg,10);
+	</script>
+</body>
+</html>

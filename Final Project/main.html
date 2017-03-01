@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Cafetaria Cleaner</title>
+    <style type="text/css">
+     #myCanvas {
+        margin-top: 20px;
+    }
+    body{
+        background-color: white;
+        text-align: center;
+    }
+    </style>
+    <link rel="icon" href="logo.png" type="image/x-icon" />
+</head>
+
+<body>
+    <canvas id="myCanvas" width="900" height="600"></canvas>
+</body>
+<script type="text/javascript">
+    var canvas = document.getElementById("myCanvas");
+    var context = canvas.getContext("2d");
+    jarak1=0;
+    jarak2=0;
+    msx = 0;
+    msy = 0;
+    /////////////////////////////////////
+    var hero = {
+        x: 830,
+        y: 450,
+        width: 50,
+        height: 85,
+        zoom: 1,
+        spriteXNow: 2,
+        spriteYNow: 0,
+        speed: 12,
+        spriteYCounter: 0,
+        isJalan: false,
+        healthPoint: 100
+    };
+     var pensil ={
+        x:hero.x,
+        y:hero.y,
+        clipX:8,
+        clipY:15,
+        width:7,
+        height:61,
+        gerak:false,
+        digambar:false,
+        gerakKe:"",
+        damage:10,
+        maksimal:10,
+        jumlah:10
+    };
+
+    var musuh=[];
+    cacingWidth=224;
+    cacingHeight=165;/*
+    randomX = Math.round((Math.random()*551)+9);
+    randomY = Math.round((Math.random()*272)+175);*/
+    var cacingSatu={
+        tujX:180,
+        tujY:450,
+        x: 50,
+        y: 400,
+        width: cacingWidth,
+        height: cacingHeight,
+        zoom: 1,
+        spriteXNow: 0,
+        spriteYNow: 1,
+        speed: 4,
+        spriteYCounter: 0,
+        isJalan: false,
+        healthPoint: 100,
+        damage:5,
+        blockChance:0.6
+    }
+  /*  do{
+        randomX = Math.round((Math.random()*570)+130);
+        randomY = Math.round((Math.random()*102)+2);
+    }while(randomX%2!=0||randomY%2!=0)*/
+    var cacingDua={
+        tujX:500,
+        tujY:20,
+        x: 100,
+        y: 20,
+        width: cacingWidth,
+        height: cacingHeight,
+        zoom: 1,
+        spriteXNow: 3,
+        spriteYNow: 1,
+        speed: 8,
+        spriteYCounter: 0,
+        isJalan: false,
+        healthPoint: 100,
+        damage:15,
+        blockChance:0.4
+    }
+    musuh.push(cacingSatu);
+    musuh.push(cacingDua);
+    /////////////////////////////////
+    var gameStatus = {
+        playerReady:false,
+        heroSpriteLoaded: false,
+        propertiesSpriteLoaded: false,
+        hpBarLoaded: false,
+        itemSpriteLoaded: false,
+        isPlayerLose: false,
+        isPlayerWin:false,
+        ticking: false,
+        stopTick: true,
+        cacingSpriteLoaded:false,
+        pensilSpriteLoaded: false
+    };
+
+    var gameProperty = {
+            jumlahMeja: 3,
+            canvasGridColumns: 15,
+            canvasGridRows: 10,
+            jumlahTong: 3,/*
+            jumlahSampah: 15,*/
+            sisaSampah: 15,
+            tick: 180,
+            jumlahKoin:5,
+            skor:0,
+            hoverStyle:"#FF5500F"
+    }
+        ////////////////////////////////////////////
+    var meja = [];
+
+    xPosisi = 80;
+    yPosisi = 0;
+    for (var i = 0; i < gameProperty.jumlahMeja; i++) {
+        if (i <= 1) {
+            yPosisi = 90;
+        } else {
+            xPosisi = 275;
+            yPosisi = 300;
+        }
+        meja[i] = {
+            width: 290,
+            height: 85,
+            x: xPosisi,
+            y: yPosisi
+        };
+        xPosisi += 400;
+    }
+    /////////////////////////////////////////////OBJEK//////////////////////////////////////////////////////////////
+    xPosisi = 10;
+    var tongSampah = [];
+    for (var i = 0; i < gameProperty.jumlahTong; i++) {
+        if (i <= 1) {
+            yPosisi = 2;
+        } else {
+            xPosisi = 524;
+            yPosisi = 229;
+        }
+        tongSampah[i] = {
+            width: 63,
+            height: 72,
+            x: xPosisi,
+            y: yPosisi
+        };
+        xPosisi += 830;
+    }
+
+    xPosisi=200;
+    yPosisi1=30;
+    xPosisi2=120;
+    yPosisi2=380;
+    var coin =[];
+    for(var i=0;i<gameProperty.jumlahKoin;i++){
+        if(i<=1){
+            yPosisi=yPosisi1;
+        }else if(i<=3){
+            xPosisi=xPosisi2;
+            yPosisi=yPosisi2;
+        }else{
+            xPosisi=400;
+            yPosisi=250;
+        }
+        coin[i] = {
+            width:41,
+            height:24,
+            x:xPosisi,
+            y:yPosisi,
+            drawingTime:Math.floor((Math.random()*180)),
+            hadDrawn:false,
+            ada:true
+        }
+        if(i<=1){
+            xPosisi+=400;
+            yPosisi1-=20;
+        }else if(i<=3){
+            xPosisi2+=600;
+            yPosisi2+=60;
+        }
+    }
+    //JENIS SAMPAH///////////////////////////////////////////////////////SAMPAH//////////////////////////
+    /*piring 1 point 3
+    botol 2 point 2
+    kertas 3 point 1
+    handphone 4 point 4*/
+    var sampah=[];
+    var sampah1 = [];
+    sampah1X=330;
+    sampah1Y=120;
+    for(var i=0;i<2;i++){
+        if(Math.round((Math.random()*1)+1)%2==1){
+            var xClip = 0;
+            var xwidth = 64;
+            var yheight = 27;
+            var jenis = 1;
+            var bonus = 3;
+        }else{
+            var xClip = 142;
+            var xwidth = 39;
+            var yheight = 36;
+            var jenis = 2;
+            var bonus = 2;
+            if(i===0){
+                sampah1X=350;
+            }
+        }
+        sampah.push({
+            x:sampah1X,
+            y:sampah1Y,
+            clipX:xClip,
+            clipY:0,
+            width:xwidth,
+            height:yheight,
+            ada:true,
+            point:bonus,
+            type:jenis
+        });
+        if(sampah1X==330){
+            sampah1X+=410;  
+        }else{
+            sampah1X+=390;
+        }
+        sampah1Y-=20;
+    };
+
+
+
+    var sampah2 = [];
+    sampah2X=60;
+    sampah2Y=150;
+    for(var i=0;i<3;i++){
+        sampah.push({
+            x:sampah2X,
+            y:sampah2Y,
+            clipX:0,
+            clipY:0,
+            width:64,
+            height:27,
+            ada:true,
+            point:3,
+            type:jenis
+        });
+
+        if(i==1){
+            sampah2X=600;
+            sampah2Y=200;
+        }else{
+            sampah2X=400;
+            sampah2Y=240;
+        }
+    }
+    sampah3X=280;
+    sampah3Y=395;
+    var sampah3=[];
+    for(var i=0;i<3;i++){
+        if(i!=2){
+            var jenis = 2;
+            var xpoint = 2;
+            var xClip = 142;
+            var xwidth = 39;
+            var yheight = 36;
+        }else{
+            var jenis =1;
+            var xpoint = 3;
+            var xClip =0;
+            var xwidth = 64;
+            var yheight = 27;
+        }
+        if(i==2){
+            sampah3X=258;
+            sampah3Y=335;   
+        }
+        sampah.push({
+            x:sampah3X,
+            y:sampah3Y,
+            clipX:xClip,
+            clipY:0,
+            width:xwidth,
+            height:yheight,
+            ada:true,
+            point:xpoint,
+            type:jenis
+        });
+        sampah3X+=250;
+
+    }
+
+    var sampahRandom1 = [];
+     for(var i=0;i<7;i++){
+        if(i<2){
+            var x1=201,x2=15,y1=200,y2=282;
+        }else if(i>=2&&i<5){
+            var x1=640,x2=90,y1=30,y2=15;
+        }else{
+            var x1=177,x2=594,y1=80,y2=300;
+        }
+        var sampahRandomX=Math.round((Math.random()*x1)+x2);
+        var sampahRandomY=Math.round((Math.random()*y1)+y2);
+        var jenisSampah = Math.round((Math.random()*2)+2);
+        if(jenisSampah==2){//botol
+            var xClip=142;
+            var bonus=2;
+            var xwidth=39;
+            var yheight=36;
+        }else if(jenisSampah==3){//kertas
+            var xClip=105;
+            var bonus=1;
+            var xwidth=36;
+            var yheight=30;
+        }else if(jenisSampah==4){//ipad
+            var xClip=222;
+            var bonus=5;
+            var xwidth=37;
+            var yheight=40;
+        }
+        sampah.push({
+            x:sampahRandomX,
+            y:sampahRandomY,
+            clipX:xClip,
+            clipY:0,
+            width:xwidth,
+            height:yheight,
+            ada:true,
+            point:bonus,
+            type:jenisSampah
+        });
+     }/*
+     for(var i=0;i<sampah2.length;i++){
+        console.log(sampah2[i].x,sampah3[i].y);
+     }*/
+     console.log(sampah.length);
+    /////////////////////////////////////////////OBJEK/////////////////////////////////////////////
+    var heroSprite = new Image();
+    heroSprite.src = "spriteHeroAnim.png"
+    heroSprite.onload = function () {
+        gameStatus.heroSpriteLoaded = true;
+    }
+    var hpBarSprite = new Image();
+    hpBarSprite.src = "hpBar.png";
+    hpBarSprite.onload = function () {
+        gameStatus.hpBarLoaded = true;
+    }
+    var propertiesSprite = new Image();
+    propertiesSprite.src = "newPropertiesSprite.png";
+    propertiesSprite.onload = function () {
+        gameStatus.propertiesSpriteLoaded = true;
+    }
+
+    var itemSprite = new Image();
+    itemSprite.src = "item.png";
+    itemSprite.onload = function () {
+        gameStatus.itemSpriteLoaded = true;
+    }
+
+    var cacingSprite = new Image();
+    cacingSprite.src="cacing.png";
+    cacingSprite.onload = function(){
+        gameStatus.cacingSpriteLoaded=true;
+    }
+    var tembakanPensil = new Image();
+    tembakanPensil.src="pensil.png";
+    tembakanPensil.onload=function(){
+        gameStatus.pensilSpriteLoaded = true;
+    }
+    /////////////////////////////////////////////
+    window.addEventListener("keydown", function (e) {
+        var modifier = 0.5;
+        xLama = hero.x;
+        yLama = hero.y;
+        //kiri
+        if (e.keyCode == 37) {
+            hero.x -= hero.speed * modifier;
+            hero.spriteXNow = 3;
+            hero.isJalan = true;
+        }
+        //atas
+        if (e.keyCode == 38) {
+            hero.y -= hero.speed * modifier;
+            hero.spriteXNow = 0;
+            hero.isJalan = true;
+            // hero.zoom-=0.002;
+        }
+        //kanan
+        if (e.keyCode == 39) {
+            hero.x += hero.speed * modifier;
+            hero.spriteXNow = 1;
+            hero.isJalan = true;
+        }
+        //bawah
+        if (e.keyCode == 40) {
+            hero.y += hero.speed * modifier;
+            hero.spriteXNow = 2;
+            hero.isJalan = true;
+            // hero.zoom+=0.002;
+        }
+
+        if (e.keyCode >= 37 && e.keyCode <= 40) {
+            if (hero.spriteYCounter == 5) {
+                if (hero.spriteYNow % 2 == 1) {
+                    hero.spriteYNow--;
+                } else {
+                    hero.spriteYNow++;
+                }
+                hero.spriteYCounter = 0;
+            }
+            hero.spriteYCounter++;
+        }
+
+        if (e.keyCode == 32 && gameStatus.isPlayerLose) {
+            hero.healthPoint = 100;
+            hero.x = 830;
+            hero.y = 450;
+            hero.spriteXNow = 2;
+            gameProperty.tick = 180;
+            gameProperty.skor=0;
+            gameStatus.ticking = false;
+            gameStatus.isPlayerLose = false;
+            gameStatus.isPlayerWin =false;
+            for(var i =0;i<gameProperty.jumlahKoin;i++){
+                coin[i].ada=true;
+                coin[i].drawingTime=Math.floor((Math.random()*300));
+            }
+            for(var i=0;i<sampah.length;i++){
+                sampah[i].ada=true;
+            }
+            for(var i=0;i<musuh.length;i++){
+                if(i==0){
+                    musuh[i].x=180;
+                    musuh[i].y=450;
+                }else{
+                    musuh[i].x=500;
+                    musuh[i].y=20;
+                }
+                musuh[i].tujX=musuh[i].x;
+                musuh[i].tujY=musuh[i].y;
+
+                if(musuh[i].healthPoint!=100){
+                    musuh[i].healthPoint=100;
+                }  
+            }
+            pensil.jumlah=10;
+            gameProperty.sisaSampah=15;
+        }
+
+        for (var i = 0; i < gameProperty.jumlahMeja; i++) {
+
+            if ((hero.x + hero.width >= meja[i].x) && (hero.x <= meja[i].x + meja[i].width) && (hero.y + hero.height >= meja[i].y) && (hero.y <= meja[i].y + meja[i].height) ) {
+                hero.x = xLama;
+                hero.y = yLama;
+                /*
+                    hero.healthPoint--;*/
+            }
+        }
+        for(var i =0;i<gameProperty.jumlahTong;i++){
+            if(i!=2){
+                var sampingKiri=30;
+            }else{
+                var sampingKiri=0;
+            }
+            if ((hero.x + hero.width >= tongSampah[i].x+sampingKiri) && (hero.x <= tongSampah[i].x + tongSampah[i].width-15) && (hero.y + hero.height >= tongSampah[i].y) && (hero.y <= tongSampah[i].y + tongSampah[i].height-72) ) {
+                hero.x = xLama;
+                hero.y = yLama;
+            }
+        }
+
+        for(var i=0;i<gameProperty.jumlahKoin;i++){
+            if(coin[i].hadDrawn){
+                if((hero.x<=coin[i].x+coin[i].width)&&(hero.x+hero.width>=coin[i].x)&&(hero.y<=coin[i].y+coin[i].height)&&(hero.y+hero.height>=coin[i].y)){
+                    coin[i].hadDrawn=false;
+                    coin[i].ada=false;
+                    gameProperty.skor+=20;
+                    if(hero.healthPoint<100){
+                        var tes = hero.healthPoint+20;
+                        if(tes>100){
+                            hero.healthPoint=100;
+                        }else{
+                            hero.healthPoint+=20;
+                        }
+                    }
+                }
+            }
+        }
+        for(var i=0;i<sampah.length;i++){
+                if(sampah[i].ada){
+                    if((hero.x-8<=sampah[i].x+sampah[i].width)&&(hero.x+hero.width-10>=sampah[i].x)&&(hero.y+25<=sampah[i].y+sampah[i].height)&&(hero.y+hero.height-25>=sampah[i].y)){
+                    gameProperty.skor+=sampah[i].point;
+                    sampah[i].ada=false;
+                    gameProperty.sisaSampah--;
+                    }
+                }
+                
+        }
+        
+
+        if((hero.x < 0) || (hero.x + hero.width >= canvas.width) || (hero.y <= -7) || (hero.y + hero.height >= canvas.height - 60)){
+            hero.x = xLama;
+            hero.y = yLama;
+        }
+        //console.log(e.keyCode);
+       if(e.keyCode==17){
+            console.log(hero.spriteXNow);
+            if(pensil.gerak==false&&pensil.jumlah>0){
+                    pensil.digambar=!pensil.digambar;
+                    if(hero.spriteXNow==0){//atas
+                        pensil.gerakKe="atas";
+                        pensil.width=7;
+                        pensil.height=61;
+                        pensil.x=hero.x+24;
+                        pensil.y=hero.y;    
+                    }else if(hero.spriteXNow==3){//kiri
+                        pensil.gerakKe="kiri";
+                        pensil.width=61;
+                        pensil.height=7;
+                        pensil.x=hero.x;
+                        pensil.y=hero.y+30;
+                    }else if(hero.spriteXNow==2){//bawah
+                        pensil.gerakKe="bawah";
+                        pensil.width=7;
+                        pensil.height=61;
+                        pensil.x=hero.x+24;
+                        pensil.y=hero.y+40;
+                    }else{//kanan
+                        pensil.gerakKe="kanan";
+                        pensil.width=61;
+                        pensil.height=7;
+                        pensil.x=hero.x+30;
+                        pensil.y=hero.y+30;
+                    }
+                    pensil.gerak=true;
+                    pensil.jumlah--;
+            }
+                    
+        }
+
+    });
+
+    window.addEventListener("keyup", function (e) {
+        hero.isJalan = false;
+    });
+    window.addEventListener("mousemove", function (e) {
+        var rect = canvas.getBoundingClientRect();
+        msx = e.pageX - rect.left;
+        msy = e.pageY - rect.top;
+
+        if(!gameStatus.playerReady){
+            if(msx>=370&&msx<=370+150&&msy>=300&&msy<=300+70){
+                gameProperty.hoverStyle="#FFAA55";
+                canvas.style.cursor="pointer";
+            }else{
+                gameProperty.hoverStyle="#FF5500";
+                canvas.style.cursor="default";
+            }
+        }
+        if(gameStatus.isPlayerWin){
+            if(msx>=370&&msx<=370+150&&msy>=320&&msy<=320+70){
+                gameProperty.hoverStyle="#FFAA55";
+                canvas.style.cursor="pointer";
+            }else{
+                gameProperty.hoverStyle="#FF5500";
+                canvas.style.cursor="default";
+            }
+        }
+    });
+    window.addEventListener("mousedown",function(e){
+        var rect = canvas.getBoundingClientRect();
+        msx = e.pageX - rect.left;
+        msy = e.pageY - rect.top;
+        if(!gameStatus.playerReady&&msx>=370&&msx<=370+150&&msy>=300&&msy<=300+70){
+                gameStatus.playerReady=true;
+                canvas.style.cursor="default";
+        }
+        if(gameStatus.isPlayerWin&&msx>=370&&msx<=370+150&&msy>=300&&msy<=300+70){
+            window.location.href="main2.html"
+        }
+    });
+    /////////////////////////////////////////////////////////////////////////////
+    function drawHero() {
+        context.drawImage(heroSprite, 55 * hero.spriteXNow, 91 * hero.spriteYNow, 54, 90, hero.x, hero.y, 55 * hero.zoom, 90 * hero.zoom);
+    }
+
+    function drawProperties() {
+        for (var i = 0; i < gameProperty.jumlahMeja; i++) {
+            context.drawImage(propertiesSprite, meja[i].x, meja[i].y);
+        }
+        for (var i = 0; i < gameProperty.jumlahTong; i++) {
+            context.drawImage(itemSprite, 0, 45, tongSampah[i].width, tongSampah[i].height, tongSampah[i].x, tongSampah[i].y, tongSampah[i].width, tongSampah[i].height);
+        }
+        for(var i=0;i<gameProperty.jumlahKoin;i++){
+            if(coin[i].ada==true){
+                if(gameProperty.tick<=coin[i].drawingTime){
+                    coin[i].hadDrawn=true;
+                    context.drawImage(itemSprite,64,0,coin[i].width,coin[i].height,coin[i].x,coin[i].y,coin[i].width,coin[i].height);
+                }
+            }
+        }
+       
+    }
+
+    function drawJubin() {
+        for (var i = 0; i < gameProperty.canvasGridRows; i++) {
+            for (var j = 0; j < gameProperty.canvasGridColumns; j++) {
+                if (i % 2 == 1) {
+                    if (j % 2 == 0) {
+                        context.fillStyle = "#CCC6C0";
+                    } else {
+                        context.fillStyle = "#EDE9E4";
+                    }
+                } else {
+                    if (j % 2 == 1) {
+                        context.fillStyle = "#CCC6C0";
+                    } else {
+                        context.fillStyle = "#EDE9E4";
+                    }
+                }
+                context.fillRect(j * 60, i * 60, 60, 60);
+            }
+        }
+    }
+
+    function drawInfoBar() {
+        context.fillStyle = "#5287C8";
+        context.fillRect(0, 540, canvas.width, 60);
+        context.fillStyle="#EAEBEA";
+        context.fillRect(0,540,60,60);
+        context.font = "bold 50px Calibri";
+        context.fillStyle = "#0055FF";
+        context.drawImage(itemSprite, 164, 45, 28, 51, 15, 545, 28, 50);
+        context.drawImage(itemSprite, 64, 45, 50, 51, 623, 545, 50, 50);//health
+        var x = 680;
+        var y = 557;
+        for (var i = 0; i < hero.healthPoint; i++) {
+            context.drawImage(hpBarSprite, x, y);
+            x += 2;
+        }
+        context.strokeRect(680, y, 200, 25);
+        context.drawImage(itemSprite, 114, 45, 50, 51, 65, 545, 50, 50);//time
+        context.fillStyle="#004099";
+        context.fillText(gameProperty.tick, 115, 587);
+        context.drawImage(itemSprite, 0, 117, 52, 54, 210, 545, 50, 50);
+        context.fillText(gameProperty.skor,265,587);
+        context.drawImage(itemSprite, 108, 117, 25, 25, 350, 570, 25, 25);
+        context.drawImage(itemSprite, 133, 117, 25, 25, 350, 545, 25, 25);
+        context.fillStyle="#B4D342";
+        var xpos1 = 380;
+        for(var i=0;i<musuh.length;i++){
+            for(var j=0;j<musuh[i].healthPoint;j++){
+                if(i==1){
+                    context.fillRect(xpos1,552,1,15);
+                }else{
+                    context.fillRect(xpos1,577,1,15);
+                }
+                xpos1++;
+            }
+            xpos1=380;
+        }
+        context.strokeRect(380, 552, 100, 15);
+        context.strokeRect(380, 577, 100, 15);
+        xpos1 = 500;
+        for(var i=1;i<=pensil.jumlah;i++){
+            context.drawImage(itemSprite,197,117,7,47,xpos1,545,7,47);
+            xpos1+=10;
+        }
+    }
+
+    function drawLose() {
+        context.font = "60px Calibri";
+        context.fillText("Misi Gagal !", (canvas.width / 2 + 10) - 150, (canvas.height - 60) / 2);
+        context.font = "20px Calibri";
+        context.fillText("Silahkan tekan spasi untuk mengulangi", 290, 300);
+    }
+    function drawWin(){
+        context.font = "60px Calibri";
+        context.fillText("Misi sukses !", (canvas.width / 2 + 10) - 160, (canvas.height - 60) / 2);
+        context.font = "20px Calibri";
+        context.fillText("Lanjut misi selanjutnya ?", (canvas.width / 2 +10) - 110, (canvas.height -10) / 2);
+        context.fillStyle=gameProperty.hoverStyle;
+        context.fillRect(370,320,150,70);
+        context.font = "60px Calibri";
+        context.fillStyle="#000000";
+        context.fillText("YA", 410, 375);
+    }
+
+    function awalGame(){
+        context.save();
+        context.fillStyle="#FF0000";
+        context.font = "30px Calibri";
+        context.fillText("Level 1", (canvas.width / 2 + 10) -60, (canvas.height - 170) / 2);
+         context.font = "20px Calibri";
+        context.fillText("Tips : Gunakan tombol arah untuk bergerak serta tombol Ctrl untuk menembak musuh",50,520);
+        context.restore();
+        context.font = "60px Calibri";
+        context.fillText("Siap untuk bermain ?", (canvas.width / 2 + 10) - 250, (canvas.height - 60) / 2);
+        context.save();
+        context.fillStyle=gameProperty.hoverStyle;
+        context.fillRect(370,300,150,70);
+        context.restore();
+        context.fillText("YA", 410, 355);
+    }
+
+    function counterTimer() {
+        if (!gameStatus.stopTick) {
+            gameProperty.tick--;
+            if (gameProperty.tick == 0 && gameProperty.sisaSampah > 0) {
+                gameStatus.isPlayerLose = true;
+            }
+        }
+    }
+    function drawSampah(){
+        for(var i=0;i<sampah.length;i++){
+            if(sampah[i].ada==true){
+                context.drawImage(itemSprite,sampah[i].clipX,sampah[i].clipY,sampah[i].width,sampah[i].height,sampah[i].x,sampah[i].y,sampah[i].width,sampah[i].height);
+            }   
+        }
+    }
+
+    function checkColision(){
+        if(!gameStatus.isPlayerLose&&!gameStatus.isPlayerWin){
+             for(var i=0;i<musuh.length;i++){
+                if(musuh[i].healthPoint>0){
+                    var jarakX = Math.abs((hero.x+27) - (musuh[i].x+45));
+                    var jarakY = Math.abs((hero.y+50) - (musuh[i].y+33));
+                    if(Math.sqrt((jarakX*jarakX)+(jarakY*jarakY))<=60){
+                    hero.healthPoint-=musuh[i].damage;
+                     }
+                }
+             }
+        }
+    }
+    function checkCollisionTembakan(){
+        if(!gameStatus.isPlayerLose&&!gameStatus.isPlayerWin){
+            for(var i=0;i<musuh.length;i++){
+            if(musuh[i].healthPoint>0&&pensil.digambar==true&&pensil.gerak==true &&(pensil.x + pensil.width >= musuh[i].x) && (pensil.x <= musuh[i].x + musuh[i].width*0.4) && (pensil.y + pensil.height >= musuh[i].y) && (pensil.y <= musuh[i].y + musuh[i].height*0.4)){
+                    musuh[i].healthPoint-=Math.round(pensil.damage*musuh[i].blockChance);
+                    pensil.gerak=false;
+                    pensil.digambar=false;
+                }
+            }   
+        }
+    }
+    function drawMusuh(){       
+        for(var i=0;i<musuh.length;i++){
+            if(musuh[i].healthPoint>0){
+                    //if(musuh[i].x!=musuh[i].tujX||musuh[i].y!=musuh[i].tujY){
+                        var jarakX = Math.abs((hero.x+27) - (musuh[0].x+45));
+                        var jarakY = Math.abs((hero.y+50)- (musuh[0].y+33));
+                        jarak1 = Math.sqrt((jarakX*jarakX)+(jarakY*jarakY));
+                        var jarakX = Math.abs((hero.x+27) - (musuh[1].x+45));
+                        var jarakY = Math.abs((hero.y+50)- (musuh[1].y+33));
+                        jarak2 = Math.sqrt((jarakX*jarakX)+(jarakY*jarakY));
+
+                        var jarakX = Math.abs((hero.x+27) - (musuh[i].x+45));
+                        var jarakY = Math.abs((hero.y+50)- (musuh[i].y+33));
+                        
+                       
+                        if(Math.sqrt((jarakX*jarakX)+(jarakY*jarakY))<=110){
+                            musuh[i].tujX=hero.x;
+                            musuh[i].tujY=hero.y;
+                            if(musuh[i].tujX%2!=0){
+                                musuh[i].tujX++;
+                            }
+                            if(musuh[i].tujY%2!=0){
+                                musuh[i].tujY++;
+                            }
+                        }
+                        if(musuh[i].x<musuh[i].tujX){
+                            if(i==0){
+                                musuh[i].spriteXNow=1;
+                            }else{
+                                musuh[i].spriteXNow=3;
+                            }
+                            musuh[i].x+=musuh[i].speed*0.25;
+                        }
+                        if(musuh[i].x>musuh[i].tujX){
+                             if(i==0){
+                                musuh[i].spriteXNow=0;
+                            }else{
+                                musuh[i].spriteXNow=2;
+                            }
+                            musuh[i].x-=musuh[i].speed*0.25;
+                        }
+
+                        if(musuh[i].y<musuh[i].tujY){
+                            musuh[i].y+=musuh[i].speed*0.25;
+                        }
+                        if(musuh[i].y>musuh[i].tujY){
+                            musuh[i].y-=musuh[i].speed*0.25;
+                        }
+                musuh[i].spriteYCounter++;
+                if(musuh[i].spriteYCounter==20){
+                    if(musuh[i].spriteYNow%2==0){
+                        musuh[i].spriteYNow++;
+                    }else{
+                        musuh[i].spriteYNow--;
+                    }
+                    musuh[i].spriteYCounter=0;
+                }
+                 context.drawImage(cacingSprite,musuh[i].spriteXNow*musuh[i].width,musuh[i].spriteYNow*musuh[i].height,musuh[i].width,musuh[i].height,musuh[i].x,musuh[i].y,musuh[i].width*0.4,musuh[i].height*0.4);
+            }
+            //console.log(musuh[i].x,musuh[i].y,musuh[i].tujX,musuh[i].tujY);
+           
+        }
+    }
+    function tembakanHero(){
+        if(pensil.digambar==true){
+            
+            if(pensil.x<-61||pensil.x>900||pensil.y<-61||pensil.y>600){
+                pensil.digambar=false;
+                pensil.gerak=false;
+            }
+            if(pensil.gerakKe=="atas"){
+                pensil.y-=7;
+                context.drawImage(tembakanPensil,0,15,7,61,pensil.x,pensil.y,7,61);
+            } 
+            if(pensil.gerakKe=="bawah"){
+                pensil.y+=7;
+                context.drawImage(tembakanPensil,8,15,7,61,pensil.x,pensil.y,7,61);
+            }
+            if(pensil.gerakKe=="kanan"){
+                pensil.x+=7;
+                context.drawImage(tembakanPensil,0,0,61,7,pensil.x,pensil.y,61,7);
+            }
+            if(pensil.gerakKe=="kiri"){
+                pensil.x-=7;
+                context.drawImage(tembakanPensil,0,7,61,7,pensil.x,pensil.y,61,7);
+            }
+        }
+    }
+
+    function isiPensil(){
+        if(!gameStatus.isplayerLose&&!gameStatus.isPlayerWin){
+            if(pensil.jumlah<10){
+                pensil.jumlah++;
+            }
+        }
+            
+    }
+
+    function drawAll() {
+        if (gameStatus.heroSpriteLoaded && gameStatus.propertiesSpriteLoaded && gameStatus.hpBarLoaded && gameStatus.itemSpriteLoaded&&gameStatus.cacingSpriteLoaded) {
+            context.clearRect(0, 0, canvas.width, canvas.height);
+            if(gameStatus.playerReady){
+                    if (hero.healthPoint > 0 && !gameStatus.isPlayerLose) {
+                        if(gameProperty.sisaSampah==0){
+                            gameStatus.isPlayerWin=true;//isplayerlose tetap tidak berubah
+                            gameStatus.stopTick = true;
+                            drawWin();
+                            sessionStorage.setItem("lastScore",gameProperty.skor);
+                        }else{
+                            drawJubin();
+                            drawProperties();
+                            tembakanHero();
+                            drawHero();
+                            drawSampah();
+                            drawMusuh();
+                             if (!gameStatus.ticking) {
+                                gameStatus.stopTick = false;
+                                gameStatus.ticking = true;
+                             }
+                        }
+                       
+                    } else {
+                        drawLose();
+                        gameStatus.isPlayerLose=true;
+                        gameStatus.stopTick = true;
+                        gameStatus.ticking=false;
+                    }
+            }else{
+                awalGame();
+            }
+                    
+            drawInfoBar();
+            context.font = "10px Arial";
+            context.fillStyle = "#000000";/*
+            context.fillText(msx + " " + msy, 10, 20);
+            context.fillText(hero.x+" "+hero.y,10,30);
+            context.fillText(jarak1,10,40);
+            context.fillText(jarak2,10,50);*/
+        }
+    }
+
+    setInterval(drawAll, 10);
+    setInterval(counterTimer, 1000);
+    setInterval(checkColision,250);
+    setInterval(checkCollisionTembakan,10);
+    setInterval(isiPensil,5000);
+</script>
+
+</html>
